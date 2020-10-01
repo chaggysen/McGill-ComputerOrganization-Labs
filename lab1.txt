@@ -1,0 +1,96 @@
+Lab 1
+In this lab, we will learn how to work with an ARM processor and the basics of ARM assembly by programming some common routines. The following lecture content will be required for conducting this lab: compare instructions, branch instructions, shift instructions, load and store instructions, subroutines and function calls.
+
+Part 1
+In this part, we will implement a well-known optimization technique, namely stochastic gradient descent (SGD), which is the backbone of a wide range of machine learning algorithms. We will use the SGD technique to solve a simple problem: finding the square root of an integer number.
+
+Let x2=a, where a∈Z+, the task is to calculate x=round(a−−√). Let L=(x2−a)24 be a loss function. The square root of a can be found (approximated) by finding x∗ that minimizes the loss function L, where x∗=argmin∀xL.
+
+To find (estimate) x∗ using the SGD technique, at the first time step, i=0, we start with a (random) value of x0. The algorithm updates the estimate of x∗ by performing the following computation at each iteration
+
+xi+1=xi−γ∗L′(xi)=xi−γ∗(x2i−a)xi,
+
+where γ (0<γ<1) is the learning rate, i is the time step. To simplify the update equation, we choose γ to be in the form of 2−k and k∈Z+. In practice, the value of γ∗(x2−a)x is often constrained to be within an interval (−t,t), t>0, to enable numerical stability.
+
+In C, finding the square root of an integer number a using the SGD technique with 100 iterations (cnt=100) can be implemented as:
+int sqrtIter(int a, int xi, int cnt, int k, int t)
+{
+   for (int i=0; i<cnt; i++)
+   {
+        int step = ((xi*xi-a)*xi)>>k;
+        if (step > t)
+           step = t;
+        else if(step< -t)
+           step = -t;
+        xi = xi - step;
+   }
+   return xi;
+}
+
+int x = sqrtIter(168, 1, 100, 10, 2); // Output: 13
+
+In addition, the iterative approach used in the sqrtIter function can be alternatively transformed to a recursive manner as follows.
+
+int sqrtRecur(int a, int xi, int cnt, int k, int t)
+{
+    if (cnt == 0)
+        return xi;
+    else
+    {
+        int grad = ((xi * xi - a) * xi) >> k;
+        if (grad > t)
+            grad = t;
+        else if (grad < -t)
+            grad = -t;
+        xi = xi - grad;
+        return sqrtRecur(a, xi, cnt - 1, k, t);
+    }
+}
+
+int x = sqrtRecur(168, 1, 100, 10, 2); // Output: 13
+In this part, your tasks consit of writing assembly programs to find the square root of an integer number a using different approaches. Note that in all cases, xi is stored in r0, a is stored in r1, and cnt is stored in r2. The values of k, and t are treated as immediate values and are fixed to 10, and 2, respectively. In addition, it is recommended that you perform the second exercise of Part 1 only once you will have covered function calls in the lecture.
+
+Part 1 Exercises
+
+Write an assembly program that implements the sqrtIter function.
+
+Write an assembly program that implements the sqrtRecur function using subroutines and function calls.
+
+.global _start
+_start:
+
+MOV R0, #0 // R0 will be step
+MOV R1, #168 // R1=168 (a)
+MOV R2, #1 // R2=1 (xi)
+MOV R3, #100 // R3=100 (cnt)
+MOV R4, #10 // R4=10 (k)
+MOV R5, #2 // R5=2 (t)
+
+LOOP:
+	MUL R6, R2, R2 //xi*xi
+	SUBS R7, R6, R1 // (xi*xi)-a
+	MUL R8, R7, R2 // (xi*xi-a)*xi
+	ASR R8, R8, R4 // ((xi*xi-1)*xi)>>k
+	MOV R0, R8 // load content of R8 in R0(step)
+	CMP R0, #2 // if (step > t)
+	BGT GT
+	CMP R0, #-2 //(if step < -t)
+	BLT LT
+	B YO
+	
+GT:
+MOV R0, #2 // step = t if R5-R0<=0
+B YO
+
+LT:
+MOV R0, #-2
+B YO
+
+YO:
+SUBS R2, R2, R0
+SUBS R3, R3, #1
+BGT LOOP
+
+STOP:
+B STOP
+	
