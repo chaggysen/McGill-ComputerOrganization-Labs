@@ -1,6 +1,6 @@
 .global _start
 _start:
-
+	
 .equ HEX_MEMORY_A, 0xFF200020 
 LDR R10, =HEX_MEMORY_A
 
@@ -36,16 +36,18 @@ LDR R10, =HEX_MEMORY_A
 .equ SW_MEMORY, 0xFF200040
 // LEDs Driver
 .equ LED_MEMORY, 0xFF200000
-
 MOV R7, #0
 // LOOP
 Loop:
+MOV R7, #0 // reset r7
 BL read_slider_switches_ASM
 BL write_LEDs_ASM
 BL read_PB_data_ASM
-BL PB_data_is_pressed_ASM
+BL read_PB_edgecp_ASM
+MOV R5, #0// COUNTER
+MOV R6, #1// AND 1
+B DISPLAY_VALUE
 B Loop
-
 
 // PUSHBUTTON SUBROUTINES--------------------------------
 
@@ -54,49 +56,9 @@ LDR R1, =PB_DATA_ADDRESS
 LDR R2, [R1] // use R2 to store the index
 BX LR
 
-PB_data_is_pressed_ASM:
-LDR R1, =PB_DATA_ADDRESS
-LDR R3, [R1]
-CMP R3, R2
-MOVEQ R4, #1
-MOVNE R4, #0
-B DISPLAY_VALUE // go to display_value
-
 read_PB_edgecp_ASM: 
-LDR R4, =PB_EDGE_ADDRESS
-LDR R0, [R4]
-BX LR
-
-PB_edgecp_is_pressed_ASM:
-LDR R5, =PB_EDGE_ADDRESS
-LDR R6, [R5]
-CMP R6, R0
-BEQ RETURN_1
-BNE RETURN_0
-
-RETURN_1:
-MOV R0, #1
-B END
-
-RETURN_0:
-MOV R0, #0
-B END
-
-END: BX LR
-
-PB_clear_edgecp_ASM:
-LDR R7, =PB_EDGE_ADDRESS
-STR R0, [R7]
-BX LR
-
-enable_PB_INT_ASM:
-LDR R8, =PB_INT_ADDRESS
-STR R0, [R8]
-BX LR
-
-disable_PB_INT_ASM: 
-LDR R9, =PB_INT_ADDRESS
-STR R0, [R9]
+LDR R1, =PB_EDGE_ADDRESS
+LDR R3, [R1]
 BX LR
 
 // SWITCHES SUBROUTINES-----------------------------------
@@ -113,14 +75,8 @@ write_LEDs_ASM:
     LDR R1, =LED_MEMORY
     STR R0, [R1] // // use R0 to store the value 
     BX LR
-
 // HEX SUBROUTINES---------------------------------------
 DISPLAY_VALUE:
-CMP R4, #0 // if 0 then the push button is released
-BEQ GET_VALUE
-B Loop
-
-GET_VALUE:
 CMP R0, #0
 LDREQ R9, =display_0
 CMP R0, #1
@@ -153,40 +109,58 @@ CMP R0, #14
 LDREQ R9, =display_14
 CMP R0, #15
 LDREQ R9, =display_15
-B LIGHT_UP_DISPLAY
 
-LIGHT_UP_DISPLAY:
-CMP R2, #0
+CMP R5, #4
+BEQ Loop
+AND R8, R3, R6
+CMP R8, #0
+BGT light_up_display
+ADD R5, R5, #1
+LSL R6, #1
+B DISPLAY_VALUE
+
+light_up_display:
+CMP R5, #0
 BEQ light_0
-CMP R2, #1
+CMP R5, #1
 BEQ light_1
-CMP R2, #2
+CMP R5, #2
 BEQ light_2
-CMP R2, #3
+CMP R5, #3
 BEQ light_3
 
 light_0:
 ADD R7, R7, R9
 STR R7, [R10]
-B Loop
+ADD R5, R5, #1
+LSL R6, #1
+B DISPLAY_VALUE
 
 light_1:
 MOV R11, #256
 MUL R9, R9, R11
 ADD R7, R7, R9
 STR R7, [R10]
-B Loop
+ADD R5, R5, #1
+LSL R6, #1
+B DISPLAY_VALUE
 
 light_2:
 MOV R11, #65536
 MUL R9, R9, R11
 ADD R7, R7, R9
 STR R7, [R10]
-B Loop
+ADD R5, R5, #1
+LSL R6, #1
+B DISPLAY_VALUE
 
 light_3:
 MOV R11, #16777216
 MUL R9, R9, R11
 ADD R7, R7, R9
 STR R7, [R10]
-B Loop
+ADD R5, R5, #1
+LSL R6, #1
+B DISPLAY_VALUE
+	
+	
