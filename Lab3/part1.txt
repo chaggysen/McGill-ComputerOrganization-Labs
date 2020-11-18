@@ -23,16 +23,18 @@ VGA_draw_point_ASM:
 	
 VGA_clear_pixelbuff_ASM:
 		// initiate values
-		push {lr}
 		MOV R0, #0 // start at x = 0
 		MOV R1, #0 // start at y = 0
 		MOV R2, #0 // set color = 0
+		push {lr}
 		BL clear_pixel // call clear
-		pop {pc}
+		pop {lr}
 		BX LR
 
 clear_pixel:
+		push {lr}
 		BL VGA_draw_point_ASM // call draw
+		pop {lr}
 		ADD R0, R0, #1 // increment x by 1
 		CMP R0, #320 // compare with max x
 		BLE clear_pixel
@@ -40,7 +42,6 @@ clear_pixel:
 		MOV R0, #0 // reset x to 0
 		CMP R1, #240 // compare with max y
 		BLE clear_pixel
-		pop {pc}
 		BX LR
 
 VGA_write_char_ASM:
@@ -55,16 +56,18 @@ VGA_write_char_ASM:
 		BX LR
 VGA_clear_charbuff_ASM:
 		// initiate values
-		push {lr}
 		MOV R0, #0 // start at x = 0
 		MOV R1, #0 // start at y = 0
 		MOV R2, #0 // set color = 0
+		push {lr}
 		BL clear_char // call clear
-		pop {pc}
+		pop {lr}
 		BX LR
 
 clear_char:
+		push {lr}
 		BL VGA_write_char_ASM
+		pop {lr}
 		ADD R0, R0, #1 // increment x by 1
 		CMP R0, #80 // compare with max x
 		BLE clear_char
@@ -72,7 +75,6 @@ clear_char:
 		MOV R0, #0 // reset x to 0
 		CMP R1, #60 // compare with max y
 		BLE clear_char
-		pop {pc}
 		BX LR
 
 draw_test_screen:
