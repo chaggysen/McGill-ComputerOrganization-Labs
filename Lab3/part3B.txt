@@ -79,7 +79,7 @@ draw_real_life_flag:
 @ TODO: adapt this function to draw an imaginary flag of your choice.
 draw_imaginary_flag:
         push    {r4, lr}
-        bl      draw_texan_flag
+        bl      draw_double_vietnam_flag
         pop     {r4, pc}
 
 draw_vietnam_flag:
@@ -97,6 +97,30 @@ draw_vietnam_flag:
         mov     r2, #43
         mov     r1, #120
         mov     r0, #160
+        bl      draw_star
+		B END
+
+draw_double_vietnam_flag:
+		push    {r4, lr}
+        sub     sp, sp, #8
+        ldr     r3, .flags_vietnam
+        str     r3, [sp]
+        mov     r3, #240
+        mov     r2, #320
+        mov     r1, #0
+        mov     r0, r1
+		bl      draw_rectangle
+		ldr     r4, .flags_vietnam+4
+        mov     r3, r4
+        mov     r2, #43
+        mov     r1, #120
+        mov     r0, #106
+        bl      draw_star
+		ldr     r4, .flags_vietnam+8
+        mov     r3, r4
+        mov     r2, #43
+        mov     r1, #120
+        mov     r0, #212
         bl      draw_star
 		B END
 		
@@ -135,6 +159,7 @@ draw_texan_flag:
 .flags_vietnam:
 		.word   45248 // red color
 		.word   65280 // yellow color
+		.word   0
 .flags_L32:
         .word   2911
         .word   65535
@@ -293,7 +318,7 @@ input_loop:
         push    {r4, r5, r6, r7, lr}
         sub     sp, sp, #12
         bl      VGA_clear_pixelbuff_ASM
-        bl      draw_real_life_flag
+        bl      draw_imaginary_flag
         mov     r6, #0
         mov     r4, r6
         mov     r5, r6
