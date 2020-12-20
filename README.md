@@ -59,3 +59,6 @@ CONFIG_GIC: The given CONFIG_GIC subroutine only configures the pushbuttons inte
 KEY_ISR: The given pushbuttons interrupt service routine (KEY_ISR) performs unnecessary functions that are not required for this task. You must modify this part to only perform the following functions: 1- write the content of pushbuttons edgecapture register in to the PB_int_flag memory and 2- clear the interrupts. In your main code (see IDLE), you may read the PB_int_flag memory to determine which pushbutton was pressed. Place the following code at the top of your program to designate the memory location.
 ARM_TIM_ISR: You must write this subroutine from the scratch and add it to your code. The subroutine writes the value '1' in to the tim_int_flag memory when an interrupt is received. Then it clears the interrupt. In your main code (see IDLE), you may read the tim_int_flag memory to determine whether the timer interrupt has occurred.Use the following code to designate the memory location.
 
+*DISCLAIMER*    
+These are not perfect projects and shouldn't be copied.     
+McGill University's Engineering Faculty uses code-plagiarism software to detect any copied code.
