@@ -22,7 +22,6 @@ HEX_flood_ASM: The subroutine will turn on all the segments of the HEX displays 
 HEX_write_ASM: The subroutine receives the HEX displays indices and an integer value between 0-15 through R0 and R1 registers as an arguments, respectively. Based on the second argument value (R1), the subroutine will display the corresponding hexadecimal digit (0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F) on the display(s).
 
 2. Pushbuttons: There are 4 Pushbuttons (PB0 to PB3) on the DE1-SoC Computer board. You are required to write seven subroutines to implement the functions listed below to control the pushbuttons:
-
 read_PB_data_ASM: The subroutine returns the indices of the pressed pushbuttons (the keys form the pushbuttons Data register). The indices are encoded based on a one-hot encoding scheme:
 PB0 = 0x00000001
 PB1 = 0x00000002
